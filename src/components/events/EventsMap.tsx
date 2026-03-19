@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
-import { APIProvider, AdvancedMarker, Map } from '@vis.gl/react-google-maps';
+import { APIProvider, AdvancedMarker, Map, Pin } from '@vis.gl/react-google-maps';
 import { PaginatedEvents } from '../../lib/api';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
@@ -36,21 +36,7 @@ export default function EventsMap({ events }: Props) {
               position={{ lat: event.latitude, lng: event.longitude }}
               onClick={() => setSelectedEvent(event)}
             >
-              <Box
-                sx={{
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  px: 1, py: 0.5,
-                  borderRadius: 2,
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  boxShadow: 3,
-                  border: '2px solid white',
-                  '&:hover': { bgcolor: 'primary.dark' }
-                }}
-              >
-                🎉
-              </Box>
+              <Pin background="#6366f1" borderColor="#ffffff" glyphColor="#ffffff" />
             </AdvancedMarker>
           ))}
         </Map>

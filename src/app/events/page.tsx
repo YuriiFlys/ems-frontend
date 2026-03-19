@@ -27,25 +27,30 @@ export default function EventsPage() {
     page: 1, limit: 9, sortBy: 'date', order: 'asc',
   });
 
-  const fetchEvents = useCallback(async (q: EventQueryParams) => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await getEvents(q);
-      setEvents(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load events');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     if (!authLoading) {
       if (!isAuthenticated) { router.push('/auth/login'); return; }
-      fetchEvents(query);
+
+      const fetchEvents = async () => {
+        setLoading(true);
+        setError('');
+        try {
+          const params = { ...query };
+          if (view === 'map') {
+            params.limit = 1000;
+            params.page = 1;
+          }
+          const data = await getEvents(params);
+          setEvents(data);
+        } catch (err: any) {
+          setError(err.message || 'Failed to load events');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchEvents();
     }
-  }, [authLoading, isAuthenticated, query, fetchEvents, router]);
+  }, [authLoading, isAuthenticated, query, view, router]);
 
   const setQ = (field: keyof EventQueryParams) => (e: any) => {
     setQuery(prev => ({ ...prev, [field]: e.target.value || undefined, page: 1 }));
@@ -137,12 +142,12 @@ export default function EventsPage() {
       )}
 
       {/* Pagination */}
-      {events && events.totalPages > 1 && (
+      {view !== 'map' && events && events.totalPages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Pagination
             count={events.totalPages}
-            page={query.page ?? 1}
-            onChange={(_, p) => setQuery(prev => ({ ...prev, page: p }))}
+            page={events.page}
+            onChange={(_, page) => setQuery(prev => ({ ...prev, page }))}
             color="primary"
             size="large"
           />
