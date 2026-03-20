@@ -4,10 +4,12 @@ import EventForm, { EventFormData } from '../../../components/events/EventForm';
 import { createEvent } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
+import { useToast } from '../../../hooks';
 import { useEffect } from 'react';
 
 export default function CreateEventPage() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -15,13 +17,18 @@ export default function CreateEventPage() {
   }, [isLoading, isAuthenticated, router]);
 
   const handleSubmit = async (data: EventFormData) => {
-    const payload = {
-      ...data,
-      latitude: data.latitude ? parseFloat(data.latitude) : undefined,
-      longitude: data.longitude ? parseFloat(data.longitude) : undefined,
-    };
-    const event = await createEvent(payload);
-    router.push(`/events/${event.id}`);
+    try {
+      const payload = {
+        ...data,
+        latitude: data.latitude ? parseFloat(data.latitude) : undefined,
+        longitude: data.longitude ? parseFloat(data.longitude) : undefined,
+      };
+      const event = await createEvent(payload);
+      showToast('Event created successfully!', 'success');
+      router.push(`/events/${event.id}`);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to create event', 'error');
+    }
   };
 
   return (

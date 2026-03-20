@@ -10,6 +10,7 @@ import { useAuth } from '../../context';
 import { updateProfile } from '../../lib';
 import type { User, Attendance } from '../../types';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks';
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -18,7 +19,7 @@ export default function ProfilePage() {
   const [form, setForm] = useState({ firstName: '', lastName: '', password: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const [snack, setSnack] = useState('');
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push('/auth/login');
@@ -36,7 +37,7 @@ export default function ProfilePage() {
       const payload: Partial<User & { password?: string }> = { firstName: form.firstName, lastName: form.lastName };
       if (form.password) payload.password = form.password;
       await updateProfile(payload);
-      setSnack('Profile updated!');
+      showToast('Profile updated!', 'success');
       setForm(prev => ({ ...prev, password: '' }));
     } catch (err: unknown) {
       setError((err as Error).message);
@@ -102,7 +103,6 @@ export default function ProfilePage() {
         )}
       </Box>
 
-      <Snackbar open={!!snack} autoHideDuration={3000} onClose={() => setSnack('')} message={snack} />
     </Box>
   );
 }

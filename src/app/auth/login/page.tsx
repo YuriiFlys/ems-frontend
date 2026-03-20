@@ -2,27 +2,28 @@
 import { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper, Alert, Link as MuiLink, Grid } from '@mui/material';
 import { useAuth } from '../../../context';
+import { useToast } from '../../../hooks';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
     try {
       await login(email, password);
+      showToast('Login successful!', 'success');
       router.push('/events');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      showToast(err.message || 'Login failed', 'error');
     } finally {
       setLoading(false);
     }
@@ -31,7 +32,6 @@ export default function LoginPage() {
   return (
     <Box sx={{ minHeight: '85vh', display: 'flex', alignItems: 'center', p: { xs: 2, md: 6 } }}>
       <Grid container spacing={4} alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-        {/* Left Column: Branding (80%) */}
         <Grid size={{ xs: 12 }} sx={{ flex: { md: '0 0 50%' }, textAlign: 'center', p: { xs: 2, md: 4 } }}>
           <Typography 
             variant="h2" 
@@ -52,7 +52,6 @@ export default function LoginPage() {
           </Typography>
         </Grid>
 
-        {/* Right Column: Login Form (20%) */}
         <Grid size={{ xs: 12 }} sx={{ flex: { md: '0 0 40%' }, display: 'flex', justifyContent: 'center' }}>
           <Paper
             sx={{ 
@@ -73,8 +72,6 @@ export default function LoginPage() {
               <Typography variant="h5" fontWeight={700}>Welcome back</Typography>
               <Typography variant="body2" color="text.secondary" mt={0.5}>Sign in to your account</Typography>
             </Box>
-
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
             <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <TextField

@@ -2,15 +2,16 @@
 import { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper, Alert, Link as MuiLink, Grid } from '@mui/material';
 import { useAuth } from '../../../context';
+import { useToast } from '../../../hooks';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 export default function RegisterPage() {
   const { register } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -18,23 +19,22 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.password.length < 6) { setError('Password must be at least 6 characters'); return; }
-    setError('');
+    if (form.password.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
     setLoading(true);
     try {
       await register(form);
+      showToast('Registration successful!', 'success');
       router.push('/events');
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
+      showToast(err.message || 'Registration failed', 'error');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
   return (
     <Box sx={{ minHeight: '85vh', display: 'flex', alignItems: 'center', p: { xs: 2, md: 6 } }}>
       <Grid container spacing={4} alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-        {/* Left Column: Branding (50%) */}
         <Grid size={{ xs: 12 }} sx={{ flex: { md: '0 0 50%' }, textAlign: 'center', p: { xs: 2, md: 4 } }}>
           <Typography 
             variant="h2" 
@@ -55,7 +55,6 @@ export default function RegisterPage() {
           </Typography>
         </Grid>
 
-        {/* Right Column: Register Form (40%) */}
         <Grid size={{ xs: 12 }} sx={{ flex: { md: '0 0 40%' }, display: 'flex', justifyContent: 'center' }}>
           <Paper
             sx={{
@@ -76,8 +75,6 @@ export default function RegisterPage() {
               <Typography variant="h5" fontWeight={700}>Create account</Typography>
               <Typography variant="body2" color="text.secondary" mt={0.5}>Join EMS today</Typography>
             </Box>
-
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
             <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>

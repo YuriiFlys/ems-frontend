@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Typography, Chip, Button, Paper, Divider, Alert,
-  Grid, Skeleton, Snackbar
+  Grid, Skeleton
 } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -15,9 +15,8 @@ import dayjs from 'dayjs';
 import { useParams, useRouter } from 'next/navigation';
 import { getEvent, deleteEvent, getRecommendations, attendEvent, unattendEvent } from '../../../lib';
 import { useAuth } from '../../../context';
-import { useFetchEventDetails } from '../../../hooks';
+import { useFetchEventDetails, useToast } from '../../../hooks';
 import { EventCard, ConfirmDialog } from '../../../components';
-import type { Event } from '../../../types';
 
 const CATEGORY_COLORS: Record<string, any> = {
   MUSIC: 'secondary', SPORT: 'success', ART: 'info', FOOD: 'warning', IT: 'primary', OTHER: 'error',
@@ -39,7 +38,7 @@ export default function EventDetailPage() {
   const [attending, setAttending] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [snack, setSnack] = useState('');
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (event && user) {
@@ -62,14 +61,14 @@ export default function EventDetailPage() {
     try {
       if (attending) {
         await unattendEvent(id);
-        setSnack('RSVP cancelled');
+        showToast('RSVP cancelled', 'info');
       } else {
         await attendEvent(id);
-        setSnack('You\'re attending!');
+        showToast("You're attending!", 'success');
       }
       setAttending(!attending);
     } catch (e: any) {
-      setSnack(e.message);
+      showToast(e.message, 'error');
     }
   };
 
@@ -77,9 +76,10 @@ export default function EventDetailPage() {
     setDeleteLoading(true);
     try {
       await deleteEvent(id);
+      showToast('Event deleted', 'info');
       router.push('/events');
     } catch (e: any) {
-      setSnack(e.message);
+      showToast(e.message, 'error');
     } finally {
       setDeleteLoading(false);
       setDeleteOpen(false);
@@ -176,13 +176,6 @@ export default function EventDetailPage() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteOpen(false)}
         loading={deleteLoading}
-      />
-
-      <Snackbar
-        open={!!snack}
-        autoHideDuration={3000}
-        onClose={() => setSnack('')}
-        message={snack}
       />
     </Box>
   );

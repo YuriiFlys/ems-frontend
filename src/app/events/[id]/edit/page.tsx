@@ -5,10 +5,12 @@ import EventForm, { EventFormData } from '../../../../components/events/EventFor
 import { getEvent, updateEvent } from '../../../../lib/api';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '../../../../context/AuthContext';
+import { useToast } from '../../../../hooks';
 
 export default function EditEventPage() {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -36,13 +38,18 @@ export default function EditEventPage() {
   }, [id, isLoading, isAuthenticated, user, router]);
 
   const handleSubmit = async (data: EventFormData) => {
-    const payload = {
-      ...data,
-      latitude: data.latitude ? parseFloat(data.latitude) : undefined,
-      longitude: data.longitude ? parseFloat(data.longitude) : undefined,
-    };
-    await updateEvent(id, payload);
-    router.push(`/events/${id}`);
+    try {
+      const payload = {
+        ...data,
+        latitude: data.latitude ? parseFloat(data.latitude) : undefined,
+        longitude: data.longitude ? parseFloat(data.longitude) : undefined,
+      };
+      await updateEvent(id, payload);
+      showToast('Event updated successfully!', 'success');
+      router.push(`/events/${id}`);
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update event', 'error');
+    }
   };
 
   if (loading) return <Box sx={{ maxWidth: 700, mx: 'auto', p: 4 }}><Skeleton variant="rounded" height={400} /></Box>;
