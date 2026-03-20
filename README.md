@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EMS Frontend (Event Management System)
 
-## Getting Started
+This is the user-facing web application for the Event Management System, built with **Next.js** and **React**. 
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Framework:** [Next.js](https://nextjs.org/) (Version 16, App Router)
+- **Language:** TypeScript
+- **UI Library:** [Material UI (MUI)](https://mui.com/)
+- **Data Fetching & State:** [TanStack React Query](https://tanstack.com/query/latest)
+- **Date Formatting:** [Day.js](https://day.js.org/)
+- **Maps Integration:** `@vis.gl/react-google-maps`
+
+## ✨ Features
+
+- **Authentication Flows:** Seamless user registration and login forms with toast notifications.
+- **Event Discovery:** Browse, search, and filter available events.
+- **Event Management:** Create and edit custom events.
+- **Interactive Maps:** View event locations directly on embedded Google Maps.
+- **Performant Data Caching:** React Query is used to avoid redundant API calls and keep UI data fresh.
+
+## ⚙️ Setup & Installation
+
+**1. Install dependencies:**
+
+```bash
+npm install
+```
+
+**2. Environment Configuration:**
+
+Create a `.env.local` file in the root directory to store necessary environment variables such as your backend API base URL or Google Maps API key.
+
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3000/api"
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="your_api_key_here"
+```
+
+**3. Running the application:**
+
+Start the development server. By default, it runs on port **7777**.
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:7777](http://localhost:7777) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**4. Building for Production:**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## 🏗️ Project Structure
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/` - Next.js App Router pages (Auth, Events, Profile, etc.).
+- `src/context/` - React Context providers (e.g., Toast notifications).
+- `src/hooks/` - Custom React hooks (`useToast`, React Query hooks, etc.).
+- `src/components/` - Reusable UI components.
