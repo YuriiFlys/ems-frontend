@@ -10,6 +10,7 @@ import { EventCard, EventsMap } from '../../components';
 import { getEvents } from '../../lib';
 import type { PaginatedEvents, EventQueryParams, Event } from '../../types';
 import { useAuth } from '../../context';
+import { useFetchEvents } from '../../hooks';
 import { useRouter } from 'next/navigation';
 
 const CATEGORIES = ['', 'MUSIC', 'SPORT', 'ART', 'FOOD', 'IT', 'OTHER'];
@@ -19,38 +20,24 @@ export default function EventsPage() {
   const router = useRouter();
 
   const [view, setView] = useState<'grid' | 'map'>('grid');
-  const [events, setEvents] = useState<PaginatedEvents | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   const [query, setQuery] = useState<EventQueryParams>({
     page: 1, limit: 9, sortBy: 'date', order: 'asc',
   });
 
-  useEffect(() => {
-    if (!authLoading) {
-      if (!isAuthenticated) { router.push('/auth/login'); return; }
+  const { data: events, isLoading: loading, error: queryError } = useFetchEvents(
+    query,
+    view,
+    !!isAuthenticated && !authLoading
+  );
 
-      const fetchEvents = async () => {
-        setLoading(true);
-        setError('');
-        try {
-          const params = { ...query };
-          if (view === 'map') {
-            params.limit = 1000;
-            params.page = 1;
-          }
-          const data = await getEvents(params);
-          setEvents(data);
-        } catch (err: any) {
-          setError(err.message || 'Failed to load events');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchEvents();
+  const error = queryError ? (queryError as Error).message : '';
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/login');
     }
-  }, [authLoading, isAuthenticated, query, view, router]);
+  }, [authLoading, isAuthenticated, router]);
 
   const setQ = (field: keyof EventQueryParams) => (e: any) => {
     setQuery((prev: EventQueryParams) => ({ ...prev, [field]: e.target.value || undefined, page: 1 }));
@@ -130,7 +117,7 @@ export default function EventsPage() {
           <Button variant="contained" href="/events/new" sx={{ mt: 2 }}>Create Event</Button>
         </Box>
       ) : view === 'map' ? (
-        <EventsMap events={events} />
+        <EventsMap events={events ?? null} />
       ) : (
         <Grid container spacing={2}>
           {events?.data.map((event: Event) => (

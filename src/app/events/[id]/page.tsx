@@ -15,6 +15,7 @@ import dayjs from 'dayjs';
 import { useParams, useRouter } from 'next/navigation';
 import { getEvent, deleteEvent, getRecommendations, attendEvent, unattendEvent } from '../../../lib';
 import { useAuth } from '../../../context';
+import { useFetchEventDetails } from '../../../hooks';
 import { EventCard, ConfirmDialog } from '../../../components';
 import type { Event } from '../../../types';
 
@@ -27,38 +28,35 @@ export default function EventDetailPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
-  const [event, setEvent] = useState<Event | null>(null);
-  const [recs, setRecs] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, isLoading: queryLoading, isError } = useFetchEventDetails(
+    id,
+    !!isAuthenticated && !authLoading
+  );
+
+  const event = data?.event ?? null;
+  const recs = data?.recommendations ?? [];
+
   const [attending, setAttending] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [snack, setSnack] = useState('');
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated) { router.push('/auth/login'); return; }
-    
-    const currentUserId = user?.id;
-    
-    const load = async () => {
-      try {
-        const [ev, recommendations] = await Promise.all([
-          getEvent(id),
-          getRecommendations(id),
-        ]);
-        setEvent(ev);
-        setRecs(recommendations ?? []);
-        const isAttending = ev.attendances?.some((a: any) => a.userId === currentUserId);
-        setAttending(!!isAttending);
-      } catch {
-        router.push('/events');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [id, authLoading, isAuthenticated, user?.id, router]);
+    if (event && user) {
+      setAttending(!!event.attendances?.some((a: any) => a.userId === user.id));
+    }
+  }, [event, user]);
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/login');
+    }
+    if (isError) {
+      router.push('/events');
+    }
+  }, [authLoading, isAuthenticated, isError, router]);
+
+  const loading = authLoading || queryLoading;
 
   const toggleAttend = async () => {
     try {
