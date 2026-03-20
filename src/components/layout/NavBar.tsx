@@ -1,9 +1,8 @@
 'use client';
 import { AppBar, Toolbar, Typography, Button, Box, IconButton, Chip } from '@mui/material';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { APIProvider, AdvancedMarker, Map, Pin } from '@vis.gl/react-google-maps';
-import { PaginatedEvents } from '../../lib/api';
+import type { PaginatedEvents, Event } from '../../types';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 
@@ -12,12 +12,12 @@ interface Props {
 
 export default function EventsMap({ events }: Props) {
   const router = useRouter();
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   // Default center to Kyiv if no events with coordinates, else center on the first event with coordinates
-  const validEvents = events?.data?.filter((e: any) => e.latitude && e.longitude) || [];
+  const validEvents = events?.data?.filter((e: Event) => e.latitude && e.longitude) || [];
   const defaultCenter = validEvents.length > 0
-    ? { lat: validEvents[0].latitude, lng: validEvents[0].longitude }
+    ? { lat: validEvents[0].latitude as number, lng: validEvents[0].longitude as number }
     : { lat: 50.4501, lng: 30.5234 }; // Kyiv
 
   return (
@@ -30,10 +30,10 @@ export default function EventsMap({ events }: Props) {
           gestureHandling={'greedy'}
           disableDefaultUI={true}
         >
-          {validEvents.map((event: any) => (
+          {validEvents.map((event: Event) => (
             <AdvancedMarker
               key={event.id}
-              position={{ lat: event.latitude, lng: event.longitude }}
+              position={{ lat: event.latitude as number, lng: event.longitude as number }}
               onClick={() => setSelectedEvent(event)}
             >
               <Pin background="#6366f1" borderColor="#ffffff" glyphColor="#ffffff" />

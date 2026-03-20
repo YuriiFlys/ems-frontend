@@ -1,16 +1,10 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { login as apiLogin, register as apiRegister, getProfile } from '../lib/api';
-import { getToken, setToken, removeToken } from '../lib/auth';
+import { login as apiLogin, register as apiRegister, getProfile } from '../lib';
+import { getToken, setToken, removeToken } from '../lib';
+import type { User, RegisterData } from '../types';
 
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'USER' | 'ADMIN';
-  attendances?: any[];
-}
+
 
 interface AuthContextType {
   user: User | null;
@@ -21,12 +15,7 @@ interface AuthContextType {
   logout: () => void;
 }
 
-interface RegisterData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}
+
 
 const AuthContext = createContext<AuthContextType | null>(null);
 

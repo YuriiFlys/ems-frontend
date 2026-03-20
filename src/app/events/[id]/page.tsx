@@ -13,10 +13,10 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import dayjs from 'dayjs';
 import { useParams, useRouter } from 'next/navigation';
-import { getEvent, deleteEvent, getRecommendations, attendEvent, unattendEvent } from '../../../lib/api';
-import { useAuth } from '../../../context/AuthContext';
-import EventCard from '../../../components/events/EventCard';
-import ConfirmDialog from '../../../components/common/ConfirmDialog';
+import { getEvent, deleteEvent, getRecommendations, attendEvent, unattendEvent } from '../../../lib';
+import { useAuth } from '../../../context';
+import { EventCard, ConfirmDialog } from '../../../components';
+import type { Event } from '../../../types';
 
 const CATEGORY_COLORS: Record<string, any> = {
   MUSIC: 'secondary', SPORT: 'success', ART: 'info', FOOD: 'warning', IT: 'primary', OTHER: 'error',
@@ -27,8 +27,8 @@ export default function EventDetailPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
-  const [event, setEvent] = useState<any>(null);
-  const [recs, setRecs] = useState<any[]>([]);
+  const [event, setEvent] = useState<Event | null>(null);
+  const [recs, setRecs] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [attending, setAttending] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -38,6 +38,9 @@ export default function EventDetailPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!isAuthenticated) { router.push('/auth/login'); return; }
+    
+    const currentUserId = user?.id;
+    
     const load = async () => {
       try {
         const [ev, recommendations] = await Promise.all([
@@ -46,8 +49,8 @@ export default function EventDetailPage() {
         ]);
         setEvent(ev);
         setRecs(recommendations ?? []);
-        const isAttending = ev.attendances?.some((a: any) => a.userId === user?.id);
-        setAttending(isAttending);
+        const isAttending = ev.attendances?.some((a: any) => a.userId === currentUserId);
+        setAttending(!!isAttending);
       } catch {
         router.push('/events');
       } finally {
@@ -55,7 +58,7 @@ export default function EventDetailPage() {
       }
     };
     load();
-  }, [id, authLoading, isAuthenticated, user, router]);
+  }, [id, authLoading, isAuthenticated, user?.id, router]);
 
   const toggleAttend = async () => {
     try {
@@ -87,7 +90,7 @@ export default function EventDetailPage() {
 
   const isOwner = user && event && (event.creatorId === user.id || user.role === 'ADMIN');
 
-  if (loading) return (
+  if (loading || !event) return (
     <Box sx={{ maxWidth: 900, mx: 'auto', p: 4 }}>
       <Skeleton variant="rounded" height={300} />
     </Box>

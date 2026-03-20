@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Box, Button, TextField, Typography, Paper, Alert, Link as MuiLink, Grid } from '@mui/material';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../context';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';

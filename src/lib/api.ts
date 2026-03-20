@@ -1,4 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+import type { User, Event, EventQueryParams, PaginatedEvents, EventFormData } from '../types';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function getAuthHeader(): HeadersInit {
   if (typeof window === 'undefined') return {};
@@ -33,13 +34,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export const login = (email: string, password: string) =>
-  request<{ access_token: string; user: any }>('/auth/login', {
+  request<{ access_token: string; user: User }>('/auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
 
 export const register = (data: { email: string; password: string; firstName: string; lastName: string }) =>
-  request<{ access_token: string; user: any }>('/auth/register', {
+  request<{ access_token: string; user: User }>('/auth/register', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -47,31 +48,12 @@ export const register = (data: { email: string; password: string; firstName: str
 // ─── Profile ─────────────────────────────────────────────────────────────────
 
 export const getProfile = () =>
-  request<any>('/users/me');
+  request<User>('/users/me');
 
 export const updateProfile = (data: Partial<{ firstName: string; lastName: string; password: string }>) =>
-  request<any>('/users/me', { method: 'PATCH', body: JSON.stringify(data) });
+  request<User>('/users/me', { method: 'PATCH', body: JSON.stringify(data) });
 
 // ─── Events ──────────────────────────────────────────────────────────────────
-
-export interface EventQueryParams {
-  category?: string;
-  search?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  sortBy?: string;
-  order?: 'asc' | 'desc';
-  page?: number;
-  limit?: number;
-}
-
-export interface PaginatedEvents {
-  data: any[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
 
 export const getEvents = (params: EventQueryParams = {}): Promise<PaginatedEvents> => {
   const qs = new URLSearchParams();
@@ -82,24 +64,24 @@ export const getEvents = (params: EventQueryParams = {}): Promise<PaginatedEvent
 };
 
 export const getEvent = (id: string) =>
-  request<any>(`/events/${id}`);
+  request<Event>(`/events/${id}`);
 
-export const createEvent = (data: any) =>
-  request<any>('/events', { method: 'POST', body: JSON.stringify(data) });
+export const createEvent = (data: EventFormData) =>
+  request<Event>('/events', { method: 'POST', body: JSON.stringify(data) });
 
-export const updateEvent = (id: string, data: any) =>
-  request<any>(`/events/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const updateEvent = (id: string, data: Partial<EventFormData>) =>
+  request<Event>(`/events/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
 
 export const deleteEvent = (id: string) =>
   request<void>(`/events/${id}`, { method: 'DELETE' });
 
 export const getRecommendations = (id: string) =>
-  request<any[]>(`/events/${id}/recommendations`);
+  request<Event[]>(`/events/${id}/recommendations`);
 
 // ─── Attendances ─────────────────────────────────────────────────────────────
 
 export const attendEvent = (eventId: string) =>
-  request<any>(`/events/${eventId}/attend`, { method: 'POST' });
+  request<{ id: string; userId: string; eventId: string }>(`/events/${eventId}/attend`, { method: 'POST' });
 
 export const unattendEvent = (eventId: string) =>
-  request<any>(`/events/${eventId}/attend`, { method: 'DELETE' });
+  request<{ success: boolean }>(`/events/${eventId}/attend`, { method: 'DELETE' });

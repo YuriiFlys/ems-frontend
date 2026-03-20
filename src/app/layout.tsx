@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import CssBaseline from '@mui/material/CssBaseline';
-import { AuthProvider } from '../context/AuthContext';
-import NavBar from '../components/layout/NavBar';
+import { AuthProvider } from '../context';
+import { NavBar } from '../components';
 import ThemeRegistry from '../components/ThemeRegistry';
 
 export const metadata: Metadata = {

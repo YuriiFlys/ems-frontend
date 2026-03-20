@@ -36,8 +36,8 @@ export default function EventForm({ initialData = {}, onSubmit, submitLabel = 'S
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const set = (field: keyof EventFormData) => (e: React.ChangeEvent<HTMLInputElement | { value: unknown }>) =>
-    setForm(prev => ({ ...prev, [field]: (e.target as HTMLInputElement).value }));
+  const set = (field: keyof EventFormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | import('@mui/material').SelectChangeEvent<string>) =>
+    setForm(prev => ({ ...prev, [field]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +49,8 @@ export default function EventForm({ initialData = {}, onSubmit, submitLabel = 'S
     setLoading(true);
     try {
       await onSubmit(form);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -70,15 +70,15 @@ export default function EventForm({ initialData = {}, onSubmit, submitLabel = 'S
         value={form.description} onChange={set('description')}
       />
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+      <Box sx={{ display: 'grid', alignItems: 'center', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
         <TextField
           label="Date & Time" type="datetime-local" required fullWidth
           value={form.date} onChange={set('date')}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
         />
         <FormControl fullWidth required>
           <InputLabel>Category</InputLabel>
-          <Select value={form.category} label="Category" onChange={set('category') as any}>
+          <Select value={form.category} label="Category" onChange={set('category')}>
             {CATEGORIES.map(c => (
               <MenuItem key={c} value={c}>{c}</MenuItem>
             ))}

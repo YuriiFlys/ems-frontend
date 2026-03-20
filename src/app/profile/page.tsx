@@ -5,9 +5,10 @@ import {
   Alert, Snackbar, Divider, Skeleton, Grid
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
-import EventCard from '../../components/events/EventCard';
-import { useAuth } from '../../context/AuthContext';
-import { updateProfile } from '../../lib/api';
+import { EventCard } from '../../components';
+import { useAuth } from '../../context';
+import { updateProfile } from '../../lib';
+import type { User, Attendance } from '../../types';
 import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
@@ -32,13 +33,13 @@ export default function ProfilePage() {
     setError('');
     setSaving(true);
     try {
-      const payload: any = { firstName: form.firstName, lastName: form.lastName };
+      const payload: Partial<User & { password?: string }> = { firstName: form.firstName, lastName: form.lastName };
       if (form.password) payload.password = form.password;
       await updateProfile(payload);
       setSnack('Profile updated!');
       setForm(prev => ({ ...prev, password: '' }));
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -86,8 +87,8 @@ export default function ProfilePage() {
       <Box mt={4}>
         <Typography variant="h5" textAlign='center' fontWeight={800} mb={2}>My Events</Typography>
         {user?.attendances && user.attendances.length > 0 ? (
-          <Grid container spacing={2}>
-            {user.attendances.map((attendance: any) => (
+          <Grid justifyContent='center' container spacing={2}>
+            {user.attendances.map((attendance: Attendance) => (
               <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={attendance.id}>
                 <EventCard event={attendance.event} />
               </Grid>

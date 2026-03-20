@@ -6,10 +6,10 @@ import {
 } from '@mui/material';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import MapIcon from '@mui/icons-material/Map';
-import EventCard from '../../components/events/EventCard';
-import EventsMap from '../../components/events/EventsMap';
-import { getEvents, PaginatedEvents, EventQueryParams } from '../../lib/api';
-import { useAuth } from '../../context/AuthContext';
+import { EventCard, EventsMap } from '../../components';
+import { getEvents } from '../../lib';
+import type { PaginatedEvents, EventQueryParams, Event } from '../../types';
+import { useAuth } from '../../context';
 import { useRouter } from 'next/navigation';
 
 const CATEGORIES = ['', 'MUSIC', 'SPORT', 'ART', 'FOOD', 'IT', 'OTHER'];
@@ -53,7 +53,7 @@ export default function EventsPage() {
   }, [authLoading, isAuthenticated, query, view, router]);
 
   const setQ = (field: keyof EventQueryParams) => (e: any) => {
-    setQuery(prev => ({ ...prev, [field]: e.target.value || undefined, page: 1 }));
+    setQuery((prev: EventQueryParams) => ({ ...prev, [field]: e.target.value || undefined, page: 1 }));
   };
 
   return (
@@ -80,7 +80,7 @@ export default function EventsPage() {
           label="Search" size="small" sx={{ minWidth: 180 }}
           onChange={e => {
             const val = e.target.value;
-            setQuery(prev => ({ ...prev, search: val || undefined, page: 1 }));
+            setQuery((prev: EventQueryParams) => ({ ...prev, search: val || undefined, page: 1 }));
           }}
         />
         <FormControl size="small" sx={{ minWidth: 140 }}>
@@ -133,7 +133,7 @@ export default function EventsPage() {
         <EventsMap events={events} />
       ) : (
         <Grid container spacing={2}>
-          {events?.data.map(event => (
+          {events?.data.map((event: Event) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={event.id}>
               <EventCard event={event} />
             </Grid>
@@ -147,7 +147,7 @@ export default function EventsPage() {
           <Pagination
             count={events.totalPages}
             page={events.page}
-            onChange={(_, page) => setQuery(prev => ({ ...prev, page }))}
+            onChange={(_, page) => setQuery((prev: EventQueryParams) => ({ ...prev, page }))}
             color="primary"
             size="large"
           />
